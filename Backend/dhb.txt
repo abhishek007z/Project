@@ -1,8 +1,0 @@
-pandeyyabhi001_db_user
-
-TLXOJmR7WfsdQb3V
-
-mongodb+srv://pandeyyabhi001_db_user:TLXOJmR7WfsdQb3V@cluster0.zhxwu6d.mongodb.net
-
-
-imagekit  : onx4zfhfw
