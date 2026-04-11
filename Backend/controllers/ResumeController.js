@@ -153,6 +153,7 @@ export const getPublicResumeById = async (req, res) => {
 | PUT : /api/resumes/update
 | Protected Route
 */
+
 export const updateResume = async (req, res) => {
   try {
     const userId = req.userId;
@@ -169,7 +170,7 @@ export const updateResume = async (req, res) => {
     }
 
     // ✅ image upload with face focus + bg remove
-  if (image) {
+if (image) {
   const stream = fs.createReadStream(image.path);
 
   const response = await imageKit.files.upload({
@@ -178,15 +179,12 @@ export const updateResume = async (req, res) => {
     folder: "user-resume",
     transformation: {
       pre:
-        "w-400,h-400,fo-face,c-maintain_ratio" +
+        "w-400,h-400,fo-face,c-fill,bg-ffffff" +
         (removeBackground ? ",e-bgremove" : ""),
     },
   });
 
-  // 🔥 ensure object exists
   resumeDataCopy.professional_info ??= {};
-
-  // 🔥 save ONLY processed image URL
   resumeDataCopy.professional_info.image = response.url;
 }
 
@@ -206,6 +204,9 @@ export const updateResume = async (req, res) => {
     });
   }
 };
+
+
+
 
 
 // import Resume from "../models/Resume";
