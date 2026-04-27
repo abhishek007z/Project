@@ -31,6 +31,7 @@ const UserSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 
+<<<<<<< HEAD
 // ✅ Password hash before saving (ONLY ONCE)
 UserSchema.pre("save", async function() {
   if (!this.isModified("password")) {
@@ -53,4 +54,10 @@ UserSchema.methods.comparePassword = function (password) {
 
 const User = mongoose.model("User", UserSchema);
 
+=======
+UserSchema.methods.comparePassword = function (password)
+
+{ return bcrypt.compareSync(password , this.password) }
+    const User = mongoose.model("User", UserSchema )
+>>>>>>> 857ab0d10402f04fc0d2ce96a2c0d15b7038f01a
 export default User;
