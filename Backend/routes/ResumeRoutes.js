@@ -18,7 +18,12 @@ resumeRouter.post(
   createReasume
 );
 
-resumeRouter.put("/update", upload.single("image"), protect, updateResume);
+resumeRouter.put(
+  "/update",
+  protect,                // ✅ FIRST auth
+  upload.single("image"), // ✅ THEN multer
+  updateResume
+);
 resumeRouter.delete("/delete/:resumeId", protect, deleteReasume);
 resumeRouter.get("/get/:resumeId", protect, getResumeById);
 resumeRouter.get("/public/:resumeId",  getPublicResumeById);

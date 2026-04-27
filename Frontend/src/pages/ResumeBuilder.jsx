@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { dummyResumeData } from '../assets/assets';
+import React, { useEffect, useState, useRef } from "react";
+import { Link, useParams } from "react-router-dom";
+import { dummyResumeData } from "../assets/assets";
 import {
   ArrowLeftIcon,
   Briefcase,
@@ -14,35 +14,36 @@ import {
   User,
   Wand2,
   Save,
-  CheckCircle
-} from 'lucide-react';
-import PersonalInfoForm from '../components/PersonalInfoForm';
-import ProfessionalSummary from '../components/ProfessionalSummary';
-import ExperienceForm from '../components/ExperienceForm';
-import EducationForm from '../components/EducationForm';
-import ProjectForm from '../components/ProjectForm';
-import AchievementsForm from '../components/AchievementsForm';
-import SkillsForm from '../components/SkillsForm';
-import TemplateSelector from '../components/TemplateSelector';
-import ColorPicker from '../components/ColorPicker';
-import ResumePreview from '../components/ResumePreview';
-import { Download, Eye, EyeOff, Share2 } from 'lucide-react';
-import { useSelector } from 'react-redux';
-import api from '../configs/api';
-import toast from 'react-hot-toast';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+  CheckCircle,
+} from "lucide-react";
+import PersonalInfoForm from "../components/PersonalInfoForm";
+import ProfessionalSummary from "../components/ProfessionalSummary";
+import ExperienceForm from "../components/ExperienceForm";
+import EducationForm from "../components/EducationForm";
+import ProjectForm from "../components/ProjectForm";
+import AchievementsForm from "../components/AchievementsForm";
+import SkillsForm from "../components/SkillsForm";
+import TemplateSelector from "../components/TemplateSelector";
+import ColorPicker from "../components/ColorPicker";
+import ResumePreview from "../components/ResumePreview";
+import { Download, Eye, EyeOff, Share2 } from "lucide-react";
+import { useSelector } from "react-redux";
+import api from "../configs/api";
+import toast from "react-hot-toast";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 const ResumeBuilder = () => {
   const { resumeId } = useParams();
   const { token } = useSelector((state) => state.auth);
   const previewRef = useRef(null);
+  const autoSaveTimer = useRef(null);
 
   const baseResumeState = {
-    _id: '',
-    title: '',
+    _id: "",
+    title: "",
     professional_info: {},
-    professional_summary: '',
+    professional_summary: "",
     experience: [],
     education: [],
     skills: [],
@@ -59,48 +60,73 @@ const ResumeBuilder = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
 
-  const previewUrl = `${window.location.origin}/view/${resumeData._id || resumeId || 'new'}`;
+  const previewUrl = `${window.location.origin}/view/${resumeData._id || resumeId || "new"}`;
 
   const loadExistingResume = async () => {
     if (!resumeId) return;
     try {
-      const { data } = await api.get('/api/resumes/get/' + resumeId, {
+      const { data } = await api.get("/api/resumes/get/" + resumeId, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       setResumeData(data.resume);
-      document.title = data.resume.title || 'Resume Builder';
+      document.title = data.resume.title || "Resume Builder";
     } catch (error) {
-      console.error('Failed to load resume data', error);
+      console.error("Failed to load resume data", error);
     }
   };
 
   const templates = [
-    { id: 'classic', label: 'Classic', description: 'Structured two-column layout with bold headings.' },
-    { id: 'minimal', label: 'Minimal', description: 'Clean typography with generous white space.' },
-    { id: 'minimal-image', label: 'Minimal + Photo', description: 'Adds a crisp avatar slot for a personal touch.' },
-    { id: 'modern', label: 'Modern', description: 'Contemporary layout with stronger accent usage.' },
+    {
+      id: "classic",
+      label: "Classic",
+      description: "Structured two-column layout with bold headings.",
+    },
+    {
+      id: "minimal",
+      label: "Minimal",
+      description: "Clean typography with generous white space.",
+    },
+    {
+      id: "minimal-image",
+      label: "Minimal + Photo",
+      description: "Adds a crisp avatar slot for a personal touch.",
+    },
+    {
+      id: "modern",
+      label: "Modern",
+      description: "Contemporary layout with stronger accent usage.",
+    },
   ];
 
-  const accentPalette = ['#2563EB', '#7C3AED', '#DC2626', '#059669', '#EA580C', '#9333EA'];
+  const accentPalette = [
+    "#2563EB",
+    "#7C3AED",
+    "#DC2626",
+    "#059669",
+    "#EA580C",
+    "#9333EA",
+  ];
 
   const completionScore = (() => {
-    const essentials = ['full_name', 'email', 'profession'];
-    const filled = essentials.filter(field => resumeData.professional_info?.[field]);
+    const essentials = ["full_name", "email", "profession"];
+    const filled = essentials.filter(
+      (field) => resumeData.professional_info?.[field],
+    );
     return Math.min(100, Math.round((filled.length / essentials.length) * 100));
   })();
 
   const handleSkillsChange = (value) => {
     const skillsArray = value
-      .split(',')
-      .map(skill => skill.trim())
+      .split(",")
+      .map((skill) => skill.trim())
       .filter(Boolean);
-    setResumeData(prev => ({ ...prev, skills: skillsArray }));
+    setResumeData((prev) => ({ ...prev, skills: skillsArray }));
   };
 
   const handleListChange = (sectionId, index, field, value) => {
-    setResumeData(prev => {
+    setResumeData((prev) => {
       const list = [...(prev[sectionId] || [])];
       list[index] = { ...(list[index] || {}), [field]: value };
       return { ...prev, [sectionId]: list };
@@ -108,58 +134,60 @@ const ResumeBuilder = () => {
   };
 
   const addListItem = (sectionId, template) => {
-    setResumeData(prev => ({
+    setResumeData((prev) => ({
       ...prev,
       [sectionId]: [...(prev[sectionId] || []), template],
     }));
   };
 
   const removeListItem = (sectionId, index) => {
-    setResumeData(prev => ({
+    setResumeData((prev) => ({
       ...prev,
       [sectionId]: (prev[sectionId] || []).filter((_, i) => i !== index),
     }));
   };
-const loadSample = () => {
-  if (!dummyResumeData || dummyResumeData.length === 0) {
-    toast.error('No sample data available');
-    return;
-  }
+  const loadSample = () => {
+    if (!dummyResumeData || dummyResumeData.length === 0) {
+      toast.error("No sample data available");
+      return;
+    }
 
-  const randomIndex = Math.floor(Math.random() * dummyResumeData.length);
-  const sampleData = dummyResumeData[randomIndex];
+    const randomIndex = Math.floor(Math.random() * dummyResumeData.length);
+    const sampleData = dummyResumeData[randomIndex];
 
-  setResumeData({
-    ...baseResumeState,
-    ...sampleData,
-    _id: resumeData._id,
-    professional_info: {
-      ...baseResumeState.professional_info,
-      ...sampleData.professional_info,
-    },
-  });
+    setResumeData({
+      ...baseResumeState,
+      ...sampleData,
+      _id: resumeData._id,
+      professional_info: {
+        ...baseResumeState.professional_info,
+        ...sampleData.professional_info,
+      },
+    });
 
-  setActiveSectionIndex(0);
-  setRemoveBackground(false);
+    setActiveSectionIndex(0);
+    setRemoveBackground(false);
 
-  toast.success('Sample data loaded successfully');
-};
+    toast.success("Sample data loaded successfully");
+  };
 
   const resetForm = () => {
-    const confirmReset = window.confirm('Are you sure you want to reset all fields? This action cannot be undone.');
-    
+    const confirmReset = window.confirm(
+      "Are you sure you want to reset all fields? This action cannot be undone.",
+    );
+
     if (confirmReset) {
       setResumeData({
         ...baseResumeState,
         _id: resumeData._id,
         template: resumeData.template,
-        accent_color: resumeData.accent_color
+        accent_color: resumeData.accent_color,
       });
       setActiveSectionIndex(0);
       setRemoveBackground(false);
       setLastSaved(null);
-      
-      toast.success('Form reset successfully');
+
+      toast.success("Form reset successfully");
     }
   };
 
@@ -169,21 +197,19 @@ const loadSample = () => {
       formData.append("resumeId", resumeData._id);
       formData.append(
         "resumeData",
-        JSON.stringify({ public: !resumeData.public })
+        JSON.stringify({ public: !resumeData.public }),
       );
 
-      const { data } = await api.put(
-        "/api/resumes/update",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const { data } = await api.put("/api/resumes/update", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       setResumeData(data.resume);
-      toast.success(`Resume is now ${data.resume.public ? "Public" : "Private"}`);
+      toast.success(
+        `Resume is now ${data.resume.public ? "Public" : "Private"}`,
+      );
     } catch (error) {
       toast.error("Failed to update visibility");
     }
@@ -193,142 +219,120 @@ const loadSample = () => {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: resumeData.title || 'My Resume',
+          title: resumeData.title || "My Resume",
           url: previewUrl,
         });
       } else if (navigator.clipboard) {
         await navigator.clipboard.writeText(previewUrl);
-        toast.success('Preview link copied to clipboard');
+        toast.success("Preview link copied to clipboard");
       } else {
-        window.prompt('Copy this link', previewUrl);
+        window.prompt("Copy this link", previewUrl);
       }
     } catch (error) {
-      console.error('Share failed', error);
+      console.error("Share failed", error);
     }
   };
 
   // FIXED: Download as single page PDF
-  const downloadResume = async () => {
-    try {
-      toast.loading('Preparing PDF...', { id: 'pdf-download' });
-      
-      // Get the resume preview element
-      const resumeElement = document.getElementById('resume-content');
-      if (!resumeElement) {
-        toast.error('Resume content not found', { id: 'pdf-download' });
-        return;
-      }
+const downloadResume = async () => {
+  try {
+    toast.loading("Preparing PDF...", { id: "pdf-download" });
 
-      // Hide unnecessary elements for PDF
-      const originalStyles = {
-        overflow: resumeElement.style.overflow,
-        boxShadow: resumeElement.style.boxShadow,
-        borderRadius: resumeElement.style.borderRadius,
-        border: resumeElement.style.border,
-        margin: resumeElement.style.margin,
-        padding: resumeElement.style.padding,
-      };
+    const resumeElement = document.getElementById("resume-content");
+    const card = resumeElement?.firstElementChild;
 
-      // Optimize styling for PDF
-      resumeElement.style.overflow = 'visible';
-      resumeElement.style.boxShadow = 'none';
-      resumeElement.style.borderRadius = '0';
-      resumeElement.style.border = 'none';
-      resumeElement.style.margin = '0';
-      resumeElement.style.padding = '0';
+    if (!resumeElement) throw new Error("Resume not found");
 
-      // Create PDF
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-        compress: true
-      });
+    // Save styles ONCE
+    const originalOuter = resumeElement.getAttribute("style") || "";
+    const originalInner = card?.getAttribute("style") || "";
 
-      // Configure PDF settings
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const margin = 10;
-      const contentWidth = pdfWidth - (margin * 2);
+    // REMOVE card look
+    resumeElement.style.background = "white";
+    resumeElement.style.padding = "0";
+    resumeElement.style.margin = "0";
 
-      // Get the resume content
-      const canvas = await html2canvas(resumeElement, {
-        scale: 2, // Higher quality
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-        onclone: (clonedDoc) => {
-          // Optimize cloned element for printing
-          const clonedElement = clonedDoc.getElementById('resume-content');
-          if (clonedElement) {
-            clonedElement.style.fontSize = '10pt';
-            clonedElement.style.lineHeight = '1.2';
-            
-            // Reduce spacing for PDF
-            const allElements = clonedElement.querySelectorAll('*');
-            allElements.forEach(el => {
-              el.style.marginTop = '2px';
-              el.style.marginBottom = '2px';
-              el.style.paddingTop = '1px';
-              el.style.paddingBottom = '1px';
-            });
-          }
-        }
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-      const imgWidth = pdfWidth - (margin * 2);
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      // Check if content fits on one page
-      if (imgHeight > pdfHeight - (margin * 2)) {
-        // Scale down to fit on one page
-        const scaleFactor = (pdfHeight - (margin * 2)) / imgHeight;
-        const scaledWidth = imgWidth * scaleFactor * 0.95;
-        const scaledHeight = imgHeight * scaleFactor * 0.95;
-
-        pdf.addImage(imgData, 'PNG', margin, margin, scaledWidth, scaledHeight);
-      } else {
-        pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
-      }
-
-      // Restore original styles
-      Object.assign(resumeElement.style, originalStyles);
-
-      // Save PDF
-      const fileName = `${resumeData.title || 'Resume'}_${new Date().toISOString().split('T')[0]}.pdf`;
-      pdf.save(fileName);
-      
-      toast.success('PDF downloaded successfully!', { id: 'pdf-download' });
-      
-    } catch (error) {
-      console.error('PDF Generation Error:', error);
-      toast.error('Failed to generate PDF', { id: 'pdf-download' });
-      
-      // Fallback to simple print method
-      fallbackDownload();
+    if (card) {
+      card.style.border = "none";
+      card.style.borderRadius = "0";
+      card.style.boxShadow = "none";
+      card.style.background = "transparent";
     }
-  };
+
+    const canvas = await html2canvas(resumeElement, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      logging: false,
+      onclone: (doc) => {
+        const el = doc.getElementById("resume-content");
+        if (el) {
+          el.style.width = "794px";
+          el.style.fontSize = "10pt";
+          el.style.lineHeight = "1.25";
+        }
+      },
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF("p", "mm", "a4", true);
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const margin = 10;
+    const ratio = Math.min(
+      (pageWidth - margin * 2) / canvas.width,
+      (pageHeight - margin * 2) / canvas.height
+    );
+
+    const w = canvas.width * ratio;
+    const h = canvas.height * ratio;
+
+    pdf.addImage(imgData, "PNG", (pageWidth - w) / 2, margin, w, h, undefined, "FAST");
+
+    // RESTORE styles
+    resumeElement.setAttribute("style", originalOuter);
+    if (card) card.setAttribute("style", originalInner);
+
+    pdf.save(`Resume_${new Date().toISOString().split("T")[0]}.pdf`);
+    toast.success("PDF downloaded successfully!", { id: "pdf-download" });
+
+  } catch (err) {
+    console.error("PDF error:", err);
+    toast.error("PDF failed. Using fallback...", { id: "pdf-download" });
+    fallbackDownload();
+  }
+};
 
   // Fallback download method
-  const fallbackDownload = () => {
-    try {
-      const resumeNode = document.getElementById('resume-content');
-      if (!resumeNode) return;
-      
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) {
-        toast.error('Please allow popups to download');
-        return;
-      }
+const fallbackDownload = () => {
+  try {
+    const resumeNode = document.getElementById("resume-content");
+    if (!resumeNode) return;
 
-      // Create optimized HTML for printing
-     const optimizedHTML = `
+    const cloned = resumeNode.cloneNode(true);
+    const card = cloned.firstElementChild;
+
+    if (card) {
+      card.style.border = "none";
+      card.style.borderRadius = "0";
+      card.style.boxShadow = "none";
+      card.style.background = "transparent";
+    }
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast.error("Please allow popups");
+      return;
+    }
+
+const optimizedHTML = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>${resumeData.title || 'Resume'}</title>
+<title>${resumeData.title || "Resume"}</title>
 
 <style>
 @page {
@@ -342,33 +346,70 @@ body {
   line-height: 1.35;
   color: #000;
   margin: 0;
-  -webkit-print-color-adjust: exact !important;
-  print-color-adjust: exact !important;
+  padding: 0;
 }
 
-/* Reset spacing */
+/* FULL RESET (no card, no border, no bg) */
 * {
   box-sizing: border-box;
   max-width: 100%;
 }
 
-h1 {
-  font-size: 20pt;
-  margin: 0 0 6px 0;
-  letter-spacing: 0.5px;
+/* ================= HEADER ================= */
+
+.resume-header {
+  text-align: center;
+  margin-bottom: 14px;
 }
+
+.resume-name {
+  font-size: 22pt;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+}
+
+/* ICON ROW PERFECT FIX */
+.contact-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.contact-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 10pt;
+  white-space: nowrap;
+}
+
+.contact-item .icon {
+  width: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 1;
+  mergin-top: -2px;
+  
+}
+
+/* ================= TEXT ================= */
 
 h2 {
   font-size: 13pt;
   margin: 14px 0 6px 0;
-  border-bottom: 1px solid #000;
-  padding-bottom: 3px;
   text-transform: uppercase;
+  font-weight: 700;
 }
 
 h3 {
   font-size: 11pt;
   margin: 6px 0 2px 0;
+  font-weight: 600;
 }
 
 p {
@@ -384,46 +425,6 @@ li {
   margin: 2px 0;
 }
 
-/* Header */
-.header {
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.header .name {
-  font-weight: bold;
-}
-
-.header .contact {
-  font-size: 9.5pt;
-}
-
-/* Two column sections */
-.row {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.left {
-  width: 70%;
-}
-
-.right {
-  width: 28%;
-}
-
-/* Compact mode */
-.compact p,
-.compact li {
-  font-size: 10pt;
-}
-
-.section {
-  margin-bottom: 8px;
-}
-
-/* Print fix */
 @media print {
   body {
     zoom: 0.97;
@@ -434,21 +435,35 @@ li {
 
 <body>
 
-<div class="compact">
+<div class="resume-header">
+  <h1 class="resume-name">
+    ${resumeData.professional_info?.full_name || "YOUR NAME"}
+  </h1>
 
-  <div class="header">
-    <h1 class="name">${resumeData.name || "YOUR NAME"}</h1>
-    <div class="contact">
-      ${resumeData.email || "email@email.com"} | 
-      ${resumeData.phone || "+91-XXXXXXXXXX"} | 
-      ${resumeData.location || "City, Country"} | 
-      ${resumeData.linkedin || "linkedin.com/in/username"}
+  <div class="contact-row">
+    <div class="contact-item">
+      <span class="icon">✉</span>
+      <span>${resumeData.professional_info?.email || ""}</span>
+    </div>
+
+    <div class="contact-item">
+      <span class="icon">☎</span>
+      <span>${resumeData.professional_info?.phone || ""}</span>
+    </div>
+
+    <div class="contact-item">
+      <span class="icon">📍</span>
+      <span>${resumeData.professional_info?.location || ""}</span>
+    </div>
+
+    <div class="contact-item">
+      <span class="icon">in</span>
+      <span>${resumeData.professional_info?.linkedin || ""}</span>
     </div>
   </div>
-
-  ${resumeNode.innerHTML}
-
 </div>
+
+${resumeNode.innerHTML}
 
 <script>
 window.onload = function () {
@@ -461,102 +476,136 @@ window.onload = function () {
 </html>
 `;
 
+    printWindow.document.open();
+    printWindow.document.write(optimizedHTML);
+    printWindow.document.close();
 
-      printWindow.document.write(optimizedHTML);
-      printWindow.document.close();
-      
-    } catch (error) {
-      console.error('Fallback download failed:', error);
-      toast.error('Download failed. Please try again.');
-    }
-  };
+  } catch (error) {
+    console.error("Fallback error:", error);
+    toast.error("Download failed");
+  }
+};
+
+
 
   const sections = [
-    { id: 'professional_info', name: 'Personal Info', icon: User },
-    { id: 'summary', name: 'Summary', icon: FileText },
-    { id: 'experience', name: 'Experience', icon: Briefcase },
-    { id: 'education', name: 'Education', icon: GraduationCap },
-    { id: 'project', name: 'Projects', icon: FolderIcon },
-    { id: 'achievements', name: 'Achievements', icon: Sparkles },
-    { id: 'skills', name: 'Skills', icon: Sparkles },
+    { id: "professional_info", name: "Personal Info", icon: User },
+    { id: "summary", name: "Summary", icon: FileText },
+    { id: "experience", name: "Experience", icon: Briefcase },
+    { id: "education", name: "Education", icon: GraduationCap },
+    { id: "project", name: "Projects", icon: FolderIcon },
+    { id: "achievements", name: "Achievements", icon: Sparkles },
+    { id: "skills", name: "Skills", icon: Sparkles },
   ];
 
   const currentSection = sections[activeSectionIndex];
 
-  const saveResume = async () => {
-    setIsSaving(true);
-    try {
-      const updatedResumeData = {
-        ...resumeData,
-        professional_info: { ...resumeData.professional_info },
-      };
+ const saveResume = async (moveNext = false) => {
+  if (isSaving) return;
+  setIsSaving(true);
 
-      if (
-        updatedResumeData.professional_info.image &&
-        typeof updatedResumeData.professional_info.image !== "string"
-      ) {
-        delete updatedResumeData.professional_info.image;
-      }
+  try {
+    const updatedResumeData = {
+      ...resumeData,
+      professional_info: { ...resumeData.professional_info },
+    };
 
-      const formData = new FormData();
-      formData.append('resumeData', JSON.stringify(updatedResumeData));
+    // image handling
+    if (
+      updatedResumeData.professional_info.image &&
+      typeof updatedResumeData.professional_info.image !== "string"
+    ) {
+      delete updatedResumeData.professional_info.image;
+    }
 
-      if (resumeData._id) {
-        formData.append('resumeId', resumeData._id);
-      } else if (resumeId) {
-        formData.append('resumeId', resumeId);
-      }
+    const formData = new FormData();
+    formData.append("resumeData", JSON.stringify(updatedResumeData));
 
-      removeBackground && formData.append('removeBackground', 'yes');
+    if (resumeData._id) {
+      formData.append("resumeId", resumeData._id);
+    } else if (resumeId) {
+      formData.append("resumeId", resumeId);
+    }
 
-      if (typeof resumeData.professional_info.image === 'object') {
-        formData.append('image', resumeData.professional_info.image);
-      }
+    removeBackground && formData.append("removeBackground", "yes");
 
-      const response = resumeData._id
-        ? await api.put('/api/resumes/update', formData, {
+    if (typeof resumeData.professional_info.image === "object") {
+      formData.append("image", resumeData.professional_info.image);
+    }
+
+    const response = resumeData._id
+      ? await api.put("/api/resumes/update", formData, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        : await api.post('/api/resumes/create', formData, {
+      : await api.post("/api/resumes/create", formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-      setResumeData(response.data.resume);
-      setLastSaved(new Date());
-      toast.success('Resume saved successfully');
-      
+    const freshResume = response.data.resume;
+
+    // cache break for image
+    if (freshResume.professional_info?.image) {
+      freshResume.professional_info.image += "?t=" + Date.now();
+    }
+
+    setResumeData({ ...freshResume });
+    setLastSaved(new Date());
+
+    // ✅ sirf MANUAL save pe next / message
+    if (moveNext) {
       if (activeSectionIndex < sections.length - 1) {
         setTimeout(() => {
-          setActiveSectionIndex(prev => prev + 1);
-        }, 500);
+          setActiveSectionIndex((prev) => prev + 1);
+        }, 400);
+      } else {
+        toast.success("Resume completed! You can download or share now.");
       }
-      
-      return true;
-    } catch (error) {
-      console.error('SAVE ERROR:', error.response?.data || error);
-      toast.error(error?.response?.data?.message || 'Save failed');
-      return false;
-    } finally {
-      setIsSaving(false);
     }
-  };
+
+    return true;
+  } catch (error) {
+    console.error("SAVE ERROR:", error.response?.data || error);
+    toast.error(error?.response?.data?.message || "Save failed");
+    return false;
+  } finally {
+    setIsSaving(false);
+  }
+};
+
 
   useEffect(() => {
     loadExistingResume();
   }, [resumeId]);
 
+
+  useEffect(() => {
+    if (!resumeData._id && !resumeId) return;
+
+    if (autoSaveTimer.current) {
+      clearTimeout(autoSaveTimer.current);
+    }
+
+    autoSaveTimer.current = setTimeout(() => {
+      saveResume(false);
+    }, 10000); // 2 seconds after last change
+
+    return () => clearTimeout(autoSaveTimer.current);
+  }, [resumeData]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
       <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200 shadow-sm">
-        <div className='max-w-7xl mx-auto px-4 py-3'>
+        <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <Link to={'/app'} className='group inline-flex items-center gap-2 px-3 py-1.5 text-slate-600 hover:text-blue-700 transition-colors'>
-              <ArrowLeftIcon className='size-4' />
-              <span className='text-sm font-medium'>Dashboard</span>
+            <Link
+              to={"/app"}
+              className="group inline-flex items-center gap-2 px-3 py-1.5 text-slate-600 hover:text-blue-700 transition-colors"
+            >
+              <ArrowLeftIcon className="size-4" />
+              <span className="text-sm font-medium">Dashboard</span>
             </Link>
 
             <div className="flex items-center gap-2">
-             
               <span className="text-lg font-bold bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">
                 ResumeCraft
               </span>
@@ -566,7 +615,11 @@ window.onload = function () {
               <div className="hidden md:flex items-center gap-2 px-2 py-1 bg-emerald-50 border border-emerald-200 rounded-lg">
                 <CheckCircle className="size-3 text-emerald-600" />
                 <span className="text-xs text-emerald-700">
-                  Saved {new Date(lastSaved).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  Saved{" "}
+                  {new Date(lastSaved).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </span>
               </div>
             )}
@@ -574,10 +627,8 @@ window.onload = function () {
         </div>
       </div>
 
-  <div className='max-w-7xl mx-auto px-4 pt-1'>
-
-        <div className='grid lg:grid-cols-12 gap-6'>
-          
+      <div className="max-w-7xl mx-auto px-4 pt-1">
+        <div className="grid lg:grid-cols-12 gap-6">
           <div className="lg:col-span-5">
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
               <div className="mb-6">
@@ -589,7 +640,9 @@ window.onload = function () {
                     {completionScore === 100 ? (
                       <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-100 border border-emerald-200 rounded-full">
                         <CheckCircle className="size-3 text-emerald-600" />
-                        <span className="text-xs font-medium text-emerald-700">Complete</span>
+                        <span className="text-xs font-medium text-emerald-700">
+                          Complete
+                        </span>
                       </div>
                     ) : (
                       <div className="text-xs font-medium text-blue-600">
@@ -600,9 +653,11 @@ window.onload = function () {
                 </div>
 
                 <div className="relative h-1.5 bg-slate-200 rounded-full overflow-hidden mb-1">
-                  <div 
+                  <div
                     className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-300"
-                    style={{ width: `${(activeSectionIndex * 100) / (sections.length - 1)}%` }}
+                    style={{
+                      width: `${(activeSectionIndex * 100) / (sections.length - 1)}%`,
+                    }}
                   ></div>
                 </div>
 
@@ -611,12 +666,16 @@ window.onload = function () {
                     <button
                       key={section.id}
                       onClick={() => setActiveSectionIndex(idx)}
-                      className={`flex flex-col items-center gap-1.5 transition-all ${idx <= activeSectionIndex ? 'opacity-100' : 'opacity-40 hover:opacity-70'}`}
+                      className={`flex flex-col items-center gap-1.5 transition-all ${idx <= activeSectionIndex ? "opacity-100" : "opacity-40 hover:opacity-70"}`}
                     >
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${idx === activeSectionIndex ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white scale-110' : idx < activeSectionIndex ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
+                      <div
+                        className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${idx === activeSectionIndex ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white scale-110" : idx < activeSectionIndex ? "bg-blue-100 text-blue-600" : "bg-slate-100 text-slate-400"}`}
+                      >
                         <section.icon className="size-3" />
                       </div>
-                      <span className={`text-xs font-medium ${idx === activeSectionIndex ? 'text-blue-700' : 'text-slate-500'}`}>
+                      <span
+                        className={`text-xs font-medium ${idx === activeSectionIndex ? "text-blue-700" : "text-slate-500"}`}
+                      >
                         {section.name}
                       </span>
                     </button>
@@ -626,28 +685,44 @@ window.onload = function () {
 
               <div className="mb-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
                 <div className="text-center">
-                  <h3 className="font-semibold text-slate-900 text-sm">{currentSection.name}</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Fill in the details below</p>
+                  <h3 className="font-semibold text-slate-900 text-sm">
+                    {currentSection.name}
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Fill in the details below
+                  </p>
                 </div>
               </div>
 
               <div className="mb-4 p-3 bg-gradient-to-r from-slate-50 to-white rounded-lg border border-slate-200">
                 <div className="flex items-center gap-3 mb-3">
                   <Palette className="size-4 text-blue-600" />
-                  <h4 className="font-medium text-slate-900 text-sm">Design Settings</h4>
+                  <h4 className="font-medium text-slate-900 text-sm">
+                    Design Settings
+                  </h4>
                 </div>
-                
+
                 <div className="space-y-3">
                   <ColorPicker
                     value={resumeData.accent_color}
                     palette={accentPalette}
-                    onChange={(color) => setResumeData((prev) => ({ ...prev, accent_color: color }))}
+                    onChange={(color) =>
+                      setResumeData((prev) => ({
+                        ...prev,
+                        accent_color: color,
+                      }))
+                    }
                   />
-                  
+
                   <TemplateSelector
                     templates={templates}
                     selected={resumeData.template}
-                    onSelect={(templateId) => setResumeData((prev) => ({ ...prev, template: templateId }))}
+                    onSelect={(templateId) =>
+                      setResumeData((prev) => ({
+                        ...prev,
+                        template: templateId,
+                      }))
+                    }
                   />
                 </div>
               </div>
@@ -670,7 +745,7 @@ window.onload = function () {
               </div>
 
               <div className="space-y-4 mb-4">
-                {currentSection.id === 'professional_info' && (
+                {currentSection.id === "professional_info" && (
                   <PersonalInfoForm
                     data={resumeData.professional_info}
                     onChange={(data) =>
@@ -684,77 +759,98 @@ window.onload = function () {
                   />
                 )}
 
-                {currentSection.id === 'summary' && (
+                {currentSection.id === "summary" && (
                   <ProfessionalSummary
                     value={resumeData.professional_summary}
                     onChange={(value) =>
-                      setResumeData(prev => ({ ...prev, professional_summary: value }))
+                      setResumeData((prev) => ({
+                        ...prev,
+                        professional_summary: value,
+                      }))
                     }
                   />
                 )}
 
-                {currentSection.id === 'experience' && (
+                {currentSection.id === "experience" && (
                   <ExperienceForm
                     items={resumeData.experience}
-                    onAdd={() => addListItem('experience', {
-                      company: '',
-                      position: '',
-                      start_date: '',
-                      end_date: '',
-                      description: '',
-                      is_current: false,
-                    })}
-                    onChange={(index, field, value) => handleListChange('experience', index, field, value)}
-                    onRemove={(index) => removeListItem('experience', index)}
+                    onAdd={() =>
+                      addListItem("experience", {
+                        company: "",
+                        position: "",
+                        start_date: "",
+                        end_date: "",
+                        description: "",
+                        is_current: false,
+                      })
+                    }
+                    onChange={(index, field, value) =>
+                      handleListChange("experience", index, field, value)
+                    }
+                    onRemove={(index) => removeListItem("experience", index)}
                   />
                 )}
 
-                {currentSection.id === 'education' && (
+                {currentSection.id === "education" && (
                   <EducationForm
                     items={resumeData.education}
-                    onAdd={() => addListItem('education', {
-                      institution: '',
-                      degree: '',
-                      field: '',
-                      graduation_date: '',
-                      gpa: '',
-                    })}
-                    onChange={(index, field, value) => handleListChange('education', index, field, value)}
-                    onRemove={(index) => removeListItem('education', index)}
+                    onAdd={() =>
+                      addListItem("education", {
+                        institution: "",
+                        degree: "",
+                        field: "",
+                        graduation_date: "",
+                        gpa: "",
+                      })
+                    }
+                    onChange={(index, field, value) =>
+                      handleListChange("education", index, field, value)
+                    }
+                    onRemove={(index) => removeListItem("education", index)}
                   />
                 )}
 
-                {currentSection.id === 'project' && (
+                {currentSection.id === "project" && (
                   <ProjectForm
                     items={resumeData.project}
-                    onAdd={() => addListItem('project', {
-                      name: '',
-                      type: '',
-                      description: '',
-                    })}
-                    onChange={(index, field, value) => handleListChange('project', index, field, value)}
-                    onRemove={(index) => removeListItem('project', index)}
+                    onAdd={() =>
+                      addListItem("project", {
+                        name: "",
+                        type: "",
+                        description: "",
+                      })
+                    }
+                    onChange={(index, field, value) =>
+                      handleListChange("project", index, field, value)
+                    }
+                    onRemove={(index) => removeListItem("project", index)}
                   />
                 )}
 
-                {currentSection.id === 'achievements' && (
+                {currentSection.id === "achievements" && (
                   <AchievementsForm
                     items={resumeData.achievements}
-                    onAdd={() => addListItem('achievements', {
-                      title: '',
-                      organization: '',
-                      date: '',
-                      description: '',
-                    })}
-                    onChange={(index, field, value) => handleListChange('achievements', index, field, value)}
-                    onRemove={(index) => removeListItem('achievements', index)}
+                    onAdd={() =>
+                      addListItem("achievements", {
+                        title: "",
+                        organization: "",
+                        date: "",
+                        description: "",
+                      })
+                    }
+                    onChange={(index, field, value) =>
+                      handleListChange("achievements", index, field, value)
+                    }
+                    onRemove={(index) => removeListItem("achievements", index)}
                   />
                 )}
 
-                {currentSection.id === 'skills' && (
+                {currentSection.id === "skills" && (
                   <SkillsForm
                     skills={resumeData.skills}
-                    onChange={(value) => setResumeData(prev => ({ ...prev, skills: value }))}
+                    onChange={(value) =>
+                      setResumeData((prev) => ({ ...prev, skills: value }))
+                    }
                     onPaste={(value) => handleSkillsChange(value)}
                   />
                 )}
@@ -763,14 +859,15 @@ window.onload = function () {
               <div className="flex gap-2 mt-4">
                 <button
                   onClick={() =>
-                    toast.promise(
-                      saveResume(),
-                      {
-                        loading: 'Saving...',
-                        success: 'Saved! Moving to next',
-                        error: 'Save failed',
-                      }
-                    )
+                   toast.promise(
+  saveResume(true),
+  {
+    loading: 'Saving...',
+    success: 'ResumeSaved!',
+    error: 'Save failed',
+  }
+)
+
                   }
                   disabled={isSaving}
                   className="flex-1 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 text-sm"
@@ -778,11 +875,11 @@ window.onload = function () {
                   <Save className="size-4" />
                   <span>Save Resume</span>
                 </button>
-                
+
                 <button
                   onClick={() => {
                     if (activeSectionIndex < sections.length - 1) {
-                      setActiveSectionIndex(prev => prev + 1);
+                      setActiveSectionIndex((prev) => prev + 1);
                     }
                   }}
                   disabled={activeSectionIndex === sections.length - 1}
@@ -799,13 +896,17 @@ window.onload = function () {
             <div className="sticky top-20">
               <div className="flex items-center justify-between mb-3 p-3 bg-white rounded-lg shadow-sm border border-slate-200">
                 <div className="flex items-center gap-2">
-                  <div className={`px-2 py-1 rounded-full text-xs ${resumeData.public ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'}`}>
-                    {resumeData.public ? 'Public' : 'Private'}
+                  <div
+                    className={`px-2 py-1 rounded-full text-xs ${resumeData.public ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-700"}`}
+                  >
+                    {resumeData.public ? "Public" : "Private"}
                   </div>
-                  
+
                   {resumeData.title && (
                     <div className="hidden md:block px-2 py-1 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded text-xs">
-                      <p className="font-medium text-blue-800">{resumeData.title}</p>
+                      <p className="font-medium text-blue-800">
+                        {resumeData.title}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -818,18 +919,23 @@ window.onload = function () {
                   >
                     <Share2 className="size-4 text-slate-600" />
                   </button>
-                  
+
                   <button
                     onClick={togglePublic}
-                    className={`p-2 rounded-lg border transition-all ${resumeData.public
-                        ? 'bg-emerald-50 border-emerald-300 text-emerald-700 hover:border-emerald-400'
-                        : 'bg-slate-50 border-slate-300 text-slate-700 hover:border-slate-400'
-                      }`}
-                    title={resumeData.public ? 'Make Private' : 'Make Public'}
+                    className={`p-2 rounded-lg border transition-all ${
+                      resumeData.public
+                        ? "bg-emerald-50 border-emerald-300 text-emerald-700"
+                        : "bg-slate-50 border-slate-300 text-slate-700"
+                    }`}
+                    title={resumeData.public ? "Make Private" : "Make Public"}
                   >
-                    {resumeData.public ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    {resumeData.public ? (
+                      <Eye className="size-4" />
+                    ) : (
+                      <EyeOff className="size-4" />
+                    )}
                   </button>
-                  
+
                   <button
                     onClick={downloadResume}
                     className="p-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 hover:shadow-md transition-all flex items-center gap-1.5"
@@ -844,7 +950,10 @@ window.onload = function () {
               {/* Main Resume Content with ID for PDF generation */}
               <div id="resume-content" ref={previewRef}>
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                  <ResumePreview data={resumeData} removeBackground={removeBackground} />
+                  <ResumePreview
+                    data={resumeData}
+                    removeBackground={removeBackground}
+                  />
                 </div>
               </div>
             </div>

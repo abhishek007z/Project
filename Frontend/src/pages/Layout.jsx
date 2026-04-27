@@ -21,9 +21,7 @@ const Layout = () => {
   return user ? (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
       <Navbar />
-      <div className="pt-16">
         <Outlet />
-      </div>
     </div>
   ) : (
     <Navigate to="/login" replace />

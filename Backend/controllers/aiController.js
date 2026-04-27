@@ -21,7 +21,7 @@ export const enhanceProfessionalSummary = async (req , res) => {
             model: process.env.OPENAI_MODEL,
     messages: [
         {   role: "system",
-            content: "You are an export in resume writting. Your task is to enhance the professional summary of a resume. The summary should be 1-2 sentence also highlighting key skills,experience , and career objective. Make it compelling and ATS-friendly and only return text no options or anything else." 
+            content: "You are an expert in resume writting. Your task is to enhance the professional summary of a resume. The summary should be 1-2 sentence also highlighting key skills,experience , and career objective. Make it compelling and ATS-friendly and only return text no options or anything else." 
         },
         {
             role: "user",
@@ -172,6 +172,7 @@ Provide data strictly in the following JSON format with no extra text:
       ...parsedData,
     });
 
+    
     // ✅ FIX 3: Frontend compatible response
     return res.status(201).json({
       resume: newResume,
