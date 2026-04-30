@@ -5,6 +5,7 @@ import { geminiModel } from "../configs/ai.js";
    POST : /api/debate/start
 ========================================================= */
 
+
 export const startDebate = async (req, res) => {
   try {
     const { topic } = req.body;
@@ -15,6 +16,7 @@ export const startDebate = async (req, res) => {
 
     const prompt = `
 You are a panel of 3 debate members discussing the following topic.
+
 
 TOPIC: ${topic}
 
