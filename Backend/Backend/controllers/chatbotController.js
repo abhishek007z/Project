@@ -5,6 +5,7 @@ import { geminiModel } from "../configs/ai.js";
    POST : /api/chatbot/chat
 ========================================================= */
 
+
 export const chatWithGemini = async (req, res) => {
   try {
     const { message } = req.body;
