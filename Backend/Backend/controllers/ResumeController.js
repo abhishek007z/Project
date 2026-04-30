@@ -16,6 +16,7 @@ export const createReasume = async (req, res) => {
       return res.status(400).json({
         message: "resumeData is required",
       });
+      
     }
 
     const resumeData = JSON.parse(req.body.resumeData);
