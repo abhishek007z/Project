@@ -8,6 +8,7 @@ import SecurityCapture from "../models/SecurityCapture.js"; // You'll need to cr
 // ==================
 // CAPTURE SCREENSHOT (NEW)
 // ==================
+
 export const captureScreenshot = async (req, res) => {
   try {
     const { resumeId, screenshot, timestamp, sessionId } = req.body;
