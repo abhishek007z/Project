@@ -15,6 +15,7 @@ export const generateSkillQuestions = async (req, res) => {
       return res.status(400).json({ message: "No skills found in resume" });
     }
 
+    
 const prompt = `
 You are an interview question generator.
 
