@@ -16,6 +16,7 @@ const ResumeSchema = new mongoose.Schema(
       maxlength: [50, "Title cannot be more than 50 characters"],
       default: "Untitled Resume"
     },
+    
 
     public: {
       type: Boolean,
