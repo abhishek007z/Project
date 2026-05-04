@@ -173,6 +173,7 @@ Provide data strictly in the following JSON format with no extra text:
     });
 
     
+    
     // ✅ FIX 3: Frontend compatible response
     return res.status(201).json({
       resume: newResume,
