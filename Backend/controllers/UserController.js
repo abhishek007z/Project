@@ -9,6 +9,7 @@ const generateToken = (userId) => {
 };
 
 
+
 // ================= REGISTER =================
 // POST : /api/users/register
 export const registerUser = async (req, res) => {
