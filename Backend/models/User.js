@@ -31,7 +31,7 @@ const UserSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 
-<<<<<<< HEAD
+// <<<<<<< HEAD
 // ✅ Password hash before saving (ONLY ONCE)
 UserSchema.pre("save", async function() {
   if (!this.isModified("password")) {
