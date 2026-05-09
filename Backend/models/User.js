@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
+
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -9,6 +10,7 @@ const UserSchema = new mongoose.Schema({
     minlength: [3, "Name must be at least 3 characters"],
     maxlength: [30, "Name cannot be more than 30 characters"]
   },
+
 
   email: {
     type: String,
