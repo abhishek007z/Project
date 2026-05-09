@@ -18,6 +18,7 @@ resumeRouter.post(
   createReasume
 );
 
+
 resumeRouter.put(
   "/update",
   protect,                // ✅ FIRST auth
