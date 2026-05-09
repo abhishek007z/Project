@@ -3,7 +3,6 @@ import protect from "../middlewares/authMiddleware.js";
 import { enhanceJobDescription, enhanceProfessionalSummary , uploadResume} from "../controllers/aiController.js";
 
 
-
 const aiRouters = express.Router();
 
 aiRouters.post('/enhance-pro-sum', protect , enhanceProfessionalSummary);
