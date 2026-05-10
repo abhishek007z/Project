@@ -25,6 +25,7 @@ resumeRouter.put(
   upload.single("image"), // ✅ THEN multer
   updateResume
 );
+
 resumeRouter.delete("/delete/:resumeId", protect, deleteReasume);
 resumeRouter.get("/get/:resumeId", protect, getResumeById);
 resumeRouter.get("/public/:resumeId",  getPublicResumeById);
