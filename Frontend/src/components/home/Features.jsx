@@ -146,6 +146,7 @@ const Features = () => {
                                                 <div className="flex items-center gap-2 text-sm">
                                                     <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-400"></div>
                                                     <span className="text-slate-700">Format improvements</span>
+                                                    
                                                 </div>
                                                 <div className="flex items-center gap-2 text-sm">
                                                     <div className="w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-purple-400"></div>
