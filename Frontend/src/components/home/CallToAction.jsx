@@ -1,6 +1,7 @@
 import React from 'react'
 import { ArrowRight, Sparkles, CheckCircle } from 'lucide-react'
 
+
 const CallToAction = () => {
   return (
     <div id='cta' className='relative py-24 overflow-hidden'>
