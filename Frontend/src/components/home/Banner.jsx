@@ -28,6 +28,7 @@ const Banner = () => {
         </p>
       </div>
 
+
       <style jsx>{`
         @keyframes gradient-x {
           0%, 100% { background-position: 0% 50%; }
