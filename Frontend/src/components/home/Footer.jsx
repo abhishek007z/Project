@@ -27,6 +27,7 @@ const Footer = () => {
               </span>
             </div>
             
+            
             <p className="text-slate-400 leading-relaxed max-w-md">
               Empowering professionals worldwide with AI-powered resume building tools. 
               Create resumes that get noticed and land your dream job.
