@@ -190,6 +190,7 @@ const Hero = () => {
         </div> */}
 
         {/* Stats */}
+        
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl">
           <div className="p-6 bg-gradient-to-br from-blue-50 to-white rounded-2xl border border-blue-200 text-center">
             <div className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">95%</div>
