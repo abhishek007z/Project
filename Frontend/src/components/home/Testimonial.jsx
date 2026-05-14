@@ -20,8 +20,7 @@ const Testimonial = () => {
             content: 'The professional templates and real-time optimization made creating my resume effortless. Highly recommended for professionals!',
             rating: 5
         },
-        {
-            
+        {  
             image: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&auto=format&fit=crop&q=60',
             name: 'Jordan Lee',
             handle: '@jordantalks',
